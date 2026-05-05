@@ -1,0 +1,21 @@
+REACT CRYPTOCURRENCY APP - SETUP COMMANDS
+==========================================
+
+npx create-expo-app app-name
+
+npx expo install react-native-web react-dom @expo/metro-runtime
+
+npm i -g @expo/ngrok
+
+npm install @react-navigation/native @react-navigation/stack
+
+npx expo install react-native-screens react-native-safe-area-context
+
+npm install axios
+
+npm install
+
+cd app-name
+npm install --legacy-peer-deps
+
+npx expo start --web
