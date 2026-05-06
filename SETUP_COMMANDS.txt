@@ -19,3 +19,27 @@ cd app-name
 npm install --legacy-peer-deps
 
 npx expo start --web
+
+---------------------------------------------------------------------
+# 1. Go into project
+cd app-name
+
+# 2. Clean install (IMPORTANT if you had errors before)
+rm -rf node_modules package-lock.json
+npm install
+
+# 3. Core Expo + React (MATCHED versions ✅)
+npx expo install react@19.2.0 react-dom@19.2.0 react-native-web@0.20.0 @expo/metro-runtime@4.0.0
+
+# 4. Navigation (stable combo)
+npx expo install @react-navigation/native@6.1.18
+npm install @react-navigation/stack@6.4.1
+
+# 5. Required native deps (must match Expo)
+npx expo install react-native-screens@3.31.1 react-native-safe-area-context@4.10.5
+
+# 6. Other packages
+npm install axios@1.7.7
+
+# 7. Start clean
+npx expo start -c
