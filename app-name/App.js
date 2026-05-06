@@ -82,7 +82,7 @@ function App() {
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
-                <ActivityIndicator size="large" color="#00ffcc" />
+                <ActivityIndicator size="large" color="#A855F7" />
                 <Text style={styles.loading}>Loading...</Text>
             </SafeAreaView>
         );
@@ -107,11 +107,12 @@ function App() {
                 </View>
 
                 <View style={styles.selectorBar}>
-                    <BlurView intensity={40} tint="dark" style={styles.selectorBlur}>
+                    <BlurView intensity={40} tint="light" style={styles.selectorBlur}>
                         <View style={styles.selector}>
                             <TouchableOpacity 
                                 onPress={() => setActiveScreen('Home')}
-                                style={styles.selectorTab}
+                                style={[styles.selectorTab, activeScreen === 'Home' && styles.selectorTabActive]}
+                                activeOpacity={0.7}
                             >
                                 <View style={[styles.selectorIndicator, activeScreen === 'Home' && styles.activeIndicator]} />
                                 <Text style={[styles.selectorText, activeScreen === 'Home' && styles.selectorTextActive]}>
@@ -123,7 +124,8 @@ function App() {
 
                             <TouchableOpacity 
                                 onPress={() => setActiveScreen('Markets')}
-                                style={styles.selectorTab}
+                                style={[styles.selectorTab, activeScreen === 'Markets' && styles.selectorTabActive]}
+                                activeOpacity={0.7}
                             >
                                 <View style={[styles.selectorIndicator, activeScreen === 'Markets' && styles.activeIndicator]} />
                                 <Text style={[styles.selectorText, activeScreen === 'Markets' && styles.selectorTextActive]}>
@@ -135,7 +137,8 @@ function App() {
 
                             <TouchableOpacity 
                                 onPress={() => setActiveScreen('Insights')}
-                                style={styles.selectorTab}
+                                style={[styles.selectorTab, activeScreen === 'Insights' && styles.selectorTabActive]}
+                                activeOpacity={0.7}
                             >
                                 <View style={[styles.selectorIndicator, activeScreen === 'Insights' && styles.activeIndicator]} />
                                 <Text style={[styles.selectorText, activeScreen === 'Insights' && styles.selectorTextActive]}>
@@ -271,7 +274,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: '#05070f',
+        backgroundColor: '#F5F3FF',
         paddingHorizontal: 16,
     },
 
@@ -287,20 +290,23 @@ const styles = StyleSheet.create({
 
     titleBar: {
         marginBottom: 16,
+        alignItems: 'center',
     },
 
     mainTitle: {
         fontSize: 32,
         fontWeight: '900',
-        color: '#fff',
+        color: '#2D1B4E',
         letterSpacing: -0.5,
+        textAlign: 'center',
     },
 
     subtitle: {
         fontSize: 13,
-        color: 'rgba(255,255,255,0.6)',
+        color: '#7C3AED',
         marginTop: 4,
         fontWeight: '500',
+        textAlign: 'center',
     },
 
     selectorBar: {
@@ -309,11 +315,11 @@ const styles = StyleSheet.create({
     },
 
     selectorBlur: {
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        paddingVertical: 14,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(168,85,247,0.12)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(168,85,247,0.3)',
     },
 
     selector: {
@@ -324,42 +330,53 @@ const styles = StyleSheet.create({
 
     selectorTab: {
         flex: 1,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
+        paddingVertical: 18,
+        paddingHorizontal: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
+        gap: 8,
+        borderRadius: 12,
+    },
+
+    selectorTabActive: {
+        backgroundColor: 'rgba(168,85,247,0.2)',
     },
 
     selectorIndicator: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: 'rgba(255,255,255,0.2)',
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: 'rgba(109,40,217,0.25)',
     },
 
     activeIndicator: {
-        backgroundColor: '#00ffcc',
-        width: 6,
-        height: 6,
+        backgroundColor: '#A855F7',
+        width: 8,
+        height: 8,
+        shadowColor: '#A855F7',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 8,
+        elevation: 5,
     },
 
     selectorText: {
-        color: 'rgba(255,255,255,0.5)',
-        fontSize: 13,
+        color: 'rgba(109,40,217,0.6)',
+        fontSize: 16,
         fontWeight: '600',
     },
 
     selectorTextActive: {
-        color: '#00ffcc',
+        color: '#6D28D9',
         fontWeight: '700',
+        fontSize: 16,
     },
 
     divider: {
-        width: 1,
-        height: 18,
-        backgroundColor: 'rgba(255,255,255,0.06)',
+        width: 1.5,
+        height: 28,
+        backgroundColor: 'rgba(168,85,247,0.2)',
     },
 
     /* NAVBAR GLASSMORPHISM */
@@ -421,17 +438,19 @@ const styles = StyleSheet.create({
     /* HOME */
     title: {
         fontSize: 26,
-        color: '#fff',
+        color: '#2D1B4E',
         fontWeight: '800',
         marginBottom: 10,
     },
 
     search: {
-        backgroundColor: 'rgba(255,255,255,0.06)',
+        backgroundColor: 'rgba(168,85,247,0.12)',
         borderRadius: 14,
         padding: 12,
-        color: '#fff',
+        color: '#2D1B4E',
         marginBottom: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(168,85,247,0.25)',
     },
 
     statsRow: {
@@ -442,23 +461,25 @@ const styles = StyleSheet.create({
 
     statCard: {
         flex: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(168,85,247,0.15)',
         padding: 14,
         borderRadius: 14,
         marginHorizontal: 4,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(168,85,247,0.3)',
     },
 
     statLabel: {
-        color: '#aaa',
+        color: '#6D28D9',
         fontSize: 12,
+        fontWeight: '600',
     },
 
     statValue: {
-        color: '#fff',
+        color: '#4C1D95',
         fontWeight: '700',
         marginTop: 6,
+        fontSize: 16,
     },
 
     /* LIST */
@@ -468,13 +489,13 @@ const styles = StyleSheet.create({
         padding: 14,
         marginBottom: 10,
         borderRadius: 14,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(168,85,247,0.1)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(168,85,247,0.25)',
     },
 
     rank: {
-        color: '#aaa',
+        color: '#6D28D9',
         width: 30,
     },
 
@@ -491,7 +512,7 @@ const styles = StyleSheet.create({
     },
 
     name: {
-        color: '#fff',
+        color: '#2D1B4E',
         fontWeight: '600',
     },
 
@@ -500,19 +521,21 @@ const styles = StyleSheet.create({
     },
 
     symbol: {
-        color: '#aaa',
+        color: '#6D28D9',
         fontSize: 12,
+        fontWeight: '600',
     },
 
     price: {
-        color: '#fff',
+        color: '#4C1D95',
         fontWeight: '700',
+        fontSize: 14,
     },
 
     /* OTHER SCREENS */
     screenTitle: {
         fontSize: 28,
-        color: '#fff',
+        color: '#2D1B4E',
         fontWeight: '800',
         marginBottom: 20,
         marginTop: 10,
@@ -520,7 +543,7 @@ const styles = StyleSheet.create({
 
     sectionTitle: {
         fontSize: 16,
-        color: '#fff',
+        color: '#4C1D95',
         fontWeight: '700',
         marginBottom: 12,
         marginTop: 18,
@@ -535,22 +558,22 @@ const styles = StyleSheet.create({
 
     metricCard: {
         flex: 1,
-        backgroundColor: 'rgba(0,255,204,0.08)',
+        backgroundColor: 'rgba(168,85,247,0.15)',
         borderRadius: 14,
         padding: 16,
         borderWidth: 1,
-        borderColor: 'rgba(0,255,204,0.15)',
+        borderColor: 'rgba(168,85,247,0.3)',
     },
 
     metricLabel: {
-        color: 'rgba(255,255,255,0.7)',
+        color: '#6D28D9',
         fontSize: 12,
         fontWeight: '600',
         marginBottom: 8,
     },
 
     metricValue: {
-        color: '#00ffcc',
+        color: '#4C1D95',
         fontSize: 16,
         fontWeight: '800',
     },
@@ -561,11 +584,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 12,
-        backgroundColor: 'rgba(255,255,255,0.04)',
+        backgroundColor: 'rgba(168,85,247,0.1)',
         borderRadius: 12,
         marginBottom: 8,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(168,85,247,0.25)',
     },
 
     coinRow: {
@@ -582,62 +605,64 @@ const styles = StyleSheet.create({
     },
 
     insightName: {
-        color: '#fff',
+        color: '#2D1B4E',
         fontWeight: '600',
         fontSize: 14,
     },
 
     insightValue: {
-        color: '#00ffcc',
+        color: '#6D28D9',
         fontWeight: '700',
         fontSize: 14,
     },
 
     insightCard: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(168,85,247,0.12)',
         borderRadius: 16,
         padding: 16,
         marginBottom: 14,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(168,85,247,0.25)',
     },
 
     insightCardTitle: {
-        color: '#fff',
+        color: '#4C1D95',
         fontSize: 16,
         fontWeight: '700',
         marginBottom: 8,
     },
 
     insightCardText: {
-        color: 'rgba(255,255,255,0.75)',
+        color: '#5B4A7A',
         fontSize: 14,
         lineHeight: 22,
     },
 
     screen: {
         padding: 20,
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'rgba(168,85,247,0.1)',
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(168,85,247,0.25)',
         marginTop: 10,
     },
 
     screenText: {
-        color: '#ccc',
+        color: '#5B4A7A',
         marginTop: 6,
     },
 
     loading: {
-        color: '#fff',
+        color: '#4C1D95',
         textAlign: 'center',
         marginTop: 10,
+        fontWeight: '600',
     },
 
     error: {
-        color: 'red',
+        color: '#C4123E',
         textAlign: 'center',
+        fontWeight: '600',
     },
 });
 
