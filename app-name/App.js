@@ -131,10 +131,6 @@ function App() {
                 return sorted.sort((a, b) => b.price - a.price);
             case 'price_low':
                 return sorted.sort((a, b) => a.price - b.price);
-            case 'market_cap':
-                return sorted.sort((a, b) => b.marketCap - a.marketCap);
-            case 'volume':
-                return sorted.sort((a, b) => b.volume - a.volume);
             default:
                 return sorted;
         }
@@ -196,8 +192,8 @@ function App() {
                             transform: [
                                 {
                                     translateX: wave1Anim.interpolate({
-                                        inputRange: [0, 100],
-                                        outputRange: [0, 60],
+                                        inputRange: [3, 100],
+                                        outputRange: [3, 60],
                                     }),
                                 },
                             ],
@@ -211,8 +207,8 @@ function App() {
                             transform: [
                                 {
                                     translateX: wave2Anim.interpolate({
-                                        inputRange: [0, 100],
-                                        outputRange: [0, -60],
+                                        inputRange: [3, 100],
+                                        outputRange: [3, -60],
                                     }),
                                 },
                             ],
@@ -355,22 +351,7 @@ function App() {
                                     Price ↑
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity 
-                                onPress={() => setSortBy('market_cap')}
-                                style={[styles.filterBtn, sortBy === 'market_cap' && styles.filterBtnActive]}
-                            >
-                                <Text style={[styles.filterBtnText, sortBy === 'market_cap' && styles.filterBtnTextActive]}>
-                                    Market Cap
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                                onPress={() => setSortBy('volume')}
-                                style={[styles.filterBtn, sortBy === 'volume' && styles.filterBtnActive]}
-                            >
-                                <Text style={[styles.filterBtnText, sortBy === 'volume' && styles.filterBtnTextActive]}>
-                                    Volume
-                                </Text>
-                            </TouchableOpacity>
+                            
                         </ScrollView>
 
                         <View style={styles.statsRow}>
