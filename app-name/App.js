@@ -9,6 +9,7 @@
     SafeAreaView,
     TouchableOpacity,
     ScrollView,
+    Animated,
 } from 'react-native';
 
 import Axios from "axios";
@@ -21,6 +22,36 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeScreen, setActiveScreen] = useState('Home');
+    const [currency, setCurrency] = useState('INR');
+    const [sortBy, setSortBy] = useState('rank');
+    
+    // Animation states
+    const pulseAnim = new Animated.Value(0.8);
+    const wave1Anim = new Animated.Value(20);
+    const wave2Anim = new Animated.Value(20);
+    
+    const EUR_TO_INR = 88.5; // Conversion rate
+    const USD_TO_INR = 83.2; // Conversion rate
+
+    // Format price based on selected currency
+    const formatPrice = (priceInINR) => {
+        if (currency === 'EUR') {
+            return `€${(priceInINR / EUR_TO_INR).toFixed(2)}`;
+        } else if (currency === 'USD') {
+            return `$${(priceInINR / USD_TO_INR).toFixed(2)}`;
+        }
+        return `₹${priceInINR.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+    };
+
+    // Format large numbers
+    const formatNumber = (num) => {
+        if (currency === 'EUR') {
+            return `€${(num / EUR_TO_INR).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+        } else if (currency === 'USD') {
+            return `$${(num / USD_TO_INR).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+        }
+        return `₹${num.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,9 +82,65 @@ function App() {
         fetchData();
     }, []);
 
+    // Animation effects
+    useEffect(() => {
+        // Subtle continuous pulse animation
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.1,
+                    duration: 3000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 0.8,
+                    duration: 3000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+
+        // Wave animation 1
+        Animated.loop(
+            Animated.timing(wave1Anim, {
+                toValue: 100,
+                duration: 2000,
+                useNativeDriver: true,
+            })
+        ).start();
+
+        // Wave animation 2
+        Animated.loop(
+            Animated.timing(wave2Anim, {
+                toValue: 100,
+                duration: 2500,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, []);
+
     const filteredCrypto = crypto.filter((val) =>
         val.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    // Sorting logic
+    const getSortedCrypto = (data, sortOption) => {
+        const sorted = [...data];
+        switch (sortOption) {
+            case 'price_high':
+                return sorted.sort((a, b) => b.price - a.price);
+            case 'price_low':
+                return sorted.sort((a, b) => a.price - b.price);
+            case 'market_cap':
+                return sorted.sort((a, b) => b.marketCap - a.marketCap);
+            case 'volume':
+                return sorted.sort((a, b) => b.volume - a.volume);
+            default:
+                return sorted;
+        }
+    };
+
+    const sortedFilteredCrypto = getSortedCrypto(filteredCrypto, sortBy);
 
     const totalMarketCap = crypto.reduce((sum, c) => sum + c.marketCap, 0);
     const totalVolume = crypto.reduce((sum, c) => sum + c.volume, 0);
@@ -74,7 +161,7 @@ function App() {
 
             <View style={styles.rightInfo}>
                 <Text style={styles.symbol}>{item.symbol}</Text>
-                <Text style={styles.price}>₹{item.price.toFixed(2)}</Text>
+                <Text style={styles.price}>{formatPrice(item.price)}</Text>
             </View>
         </View>
     );
@@ -101,9 +188,58 @@ function App() {
 
             {/* CREATIVE HEADER WITH FLOATING SELECTOR */}
             <View style={styles.headerSection}>
+                {/* Wavy background */}
+                <Animated.View
+                    style={[
+                        styles.waveBackground,
+                        {
+                            transform: [
+                                {
+                                    translateX: wave1Anim.interpolate({
+                                        inputRange: [0, 100],
+                                        outputRange: [0, 60],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                />
+                <Animated.View
+                    style={[
+                        styles.waveBackground2,
+                        {
+                            transform: [
+                                {
+                                    translateX: wave2Anim.interpolate({
+                                        inputRange: [0, 100],
+                                        outputRange: [0, -60],
+                                    }),
+                                },
+                            ],
+                        },
+                    ]}
+                />
+
                 <View style={styles.titleBar}>
-                    <Text style={styles.mainTitle}>Market Flux</Text>
-                    <Text style={styles.subtitle}>Real-time crypto intelligence</Text>
+                    <View style={styles.titleContainer}>
+                        <Animated.View
+                            style={[
+                                styles.glowEffect,
+                                {
+                                    opacity: pulseAnim.interpolate({
+                                        inputRange: [0.8, 1.1],
+                                        outputRange: [0.4, 0.8],
+                                    }),
+                                },
+                            ]}
+                        />
+                        <Text style={styles.mainTitle}>
+                            Market Flux
+                        </Text>
+                    </View>
+                    <Text style={styles.subtitle}>
+                        Real-time crypto intelligence
+                    </Text>
                 </View>
 
                 <View style={styles.selectorBar}>
@@ -157,6 +293,34 @@ function App() {
                     <>
                         <Text style={styles.title}>All Cryptocurrencies</Text>
 
+                        {/* Currency Toggle */}
+                        <View style={styles.currencyToggle}>
+                            <TouchableOpacity 
+                                onPress={() => setCurrency('INR')}
+                                style={[styles.currencyBtn, currency === 'INR' && styles.currencyBtnActive]}
+                            >
+                                <Text style={[styles.currencyBtnText, currency === 'INR' && styles.currencyBtnTextActive]}>
+                                    ₹ INR
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setCurrency('EUR')}
+                                style={[styles.currencyBtn, currency === 'EUR' && styles.currencyBtnActive]}
+                            >
+                                <Text style={[styles.currencyBtnText, currency === 'EUR' && styles.currencyBtnTextActive]}>
+                                    € EUR
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setCurrency('USD')}
+                                style={[styles.currencyBtn, currency === 'USD' && styles.currencyBtnActive]}
+                            >
+                                <Text style={[styles.currencyBtnText, currency === 'USD' && styles.currencyBtnTextActive]}>
+                                    $ USD
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
                         <TextInput
                             style={styles.search}
                             placeholder="Search coin..."
@@ -165,24 +329,68 @@ function App() {
                             onChangeText={setSearch}
                         />
 
+                        {/* Sorting Filters */}
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+                            <TouchableOpacity 
+                                onPress={() => setSortBy('rank')}
+                                style={[styles.filterBtn, sortBy === 'rank' && styles.filterBtnActive]}
+                            >
+                                <Text style={[styles.filterBtnText, sortBy === 'rank' && styles.filterBtnTextActive]}>
+                                    Rank
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setSortBy('price_high')}
+                                style={[styles.filterBtn, sortBy === 'price_high' && styles.filterBtnActive]}
+                            >
+                                <Text style={[styles.filterBtnText, sortBy === 'price_high' && styles.filterBtnTextActive]}>
+                                    Price ↓
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setSortBy('price_low')}
+                                style={[styles.filterBtn, sortBy === 'price_low' && styles.filterBtnActive]}
+                            >
+                                <Text style={[styles.filterBtnText, sortBy === 'price_low' && styles.filterBtnTextActive]}>
+                                    Price ↑
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setSortBy('market_cap')}
+                                style={[styles.filterBtn, sortBy === 'market_cap' && styles.filterBtnActive]}
+                            >
+                                <Text style={[styles.filterBtnText, sortBy === 'market_cap' && styles.filterBtnTextActive]}>
+                                    Market Cap
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                onPress={() => setSortBy('volume')}
+                                style={[styles.filterBtn, sortBy === 'volume' && styles.filterBtnActive]}
+                            >
+                                <Text style={[styles.filterBtnText, sortBy === 'volume' && styles.filterBtnTextActive]}>
+                                    Volume
+                                </Text>
+                            </TouchableOpacity>
+                        </ScrollView>
+
                         <View style={styles.statsRow}>
                             <View style={styles.statCard}>
                                 <Text style={styles.statLabel}>Market Cap</Text>
                                 <Text style={styles.statValue}>
-                                    ₹{totalMarketCap.toLocaleString()}
+                                    {formatNumber(totalMarketCap)}
                                 </Text>
                             </View>
 
                             <View style={styles.statCard}>
                                 <Text style={styles.statLabel}>Volume</Text>
                                 <Text style={styles.statValue}>
-                                    ₹{totalVolume.toLocaleString()}
+                                    {formatNumber(totalVolume)}
                                 </Text>
                             </View>
                         </View>
 
                         <FlatList
-                            data={filteredCrypto}
+                            data={sortedFilteredCrypto}
                             renderItem={renderCryptoItem}
                             keyExtractor={(item) => item.id}
                             scrollEnabled={false}
@@ -198,11 +406,11 @@ function App() {
                         <View style={styles.metricsGrid}>
                             <View style={styles.metricCard}>
                                 <Text style={styles.metricLabel}>Total Market Cap</Text>
-                                <Text style={styles.metricValue}>₹{totalMarketCap.toLocaleString()}</Text>
+                                <Text style={styles.metricValue}>{formatNumber(totalMarketCap)}</Text>
                             </View>
                             <View style={styles.metricCard}>
                                 <Text style={styles.metricLabel}>24h Volume</Text>
-                                <Text style={styles.metricValue}>₹{totalVolume.toLocaleString()}</Text>
+                                <Text style={styles.metricValue}>{formatNumber(totalVolume)}</Text>
                             </View>
                         </View>
 
@@ -213,7 +421,7 @@ function App() {
                                     {coin.icon && <Image source={{ uri: coin.icon }} style={styles.smallIcon} />}
                                     <Text style={styles.insightName}>{coin.name}</Text>
                                 </View>
-                                <Text style={styles.insightValue}>₹{coin.marketCap.toLocaleString()}</Text>
+                                <Text style={styles.insightValue}>{formatNumber(coin.marketCap)}</Text>
                             </View>
                         ))}
 
@@ -224,7 +432,7 @@ function App() {
                                     {coin.icon && <Image source={{ uri: coin.icon }} style={styles.smallIcon} />}
                                     <Text style={styles.insightName}>{coin.name}</Text>
                                 </View>
-                                <Text style={styles.insightValue}>₹{coin.volume.toLocaleString()}</Text>
+                                <Text style={styles.insightValue}>{formatNumber(coin.volume)}</Text>
                             </View>
                         ))}
                     </>
@@ -238,28 +446,80 @@ function App() {
                         <View style={styles.insightCard}>
                             <Text style={styles.insightCardTitle}>Market Health</Text>
                             <Text style={styles.insightCardText}>
-                                Overall market liquidity is strong with a total volume of ₹{totalVolume.toLocaleString()} today. This indicates robust trading activity across all major coins.
+                                Overall market liquidity is strong with a total volume of {formatNumber(totalVolume)} today. This indicates robust trading activity across all major coins.
                             </Text>
                         </View>
 
                         <View style={styles.insightCard}>
                             <Text style={styles.insightCardTitle}>Average Price</Text>
                             <Text style={styles.insightCardText}>
-                                Average listed coin price is ₹{averagePrice.toFixed(2)}, indicating broad mid-market interest and diverse investment opportunities.
+                                Average listed coin price is {formatPrice(averagePrice)}, indicating broad mid-market interest and diverse investment opportunities across the market spectrum.
                             </Text>
                         </View>
 
                         <View style={styles.insightCard}>
                             <Text style={styles.insightCardTitle}>Top Performing Sectors</Text>
                             <Text style={styles.insightCardText}>
-                                Large-cap assets are leading volume, with several top-cap coins showing stable demand. Market stability is at healthy levels.
+                                Large-cap assets are leading volume, with several top-cap coins showing stable demand. Market stability is at healthy levels with consistent patterns.
                             </Text>
                         </View>
 
                         <View style={styles.insightCard}>
-                            <Text style={styles.insightCardTitle}>Market Trend</Text>
+                            <Text style={styles.insightCardTitle}>Market Trend Analysis</Text>
                             <Text style={styles.insightCardText}>
-                                The cryptocurrency market continues to show strong fundamentals with consistent trading patterns. Monitor key resistance levels for trading opportunities.
+                                The cryptocurrency market continues to show strong fundamentals with consistent trading patterns. {topMarketCapCoins.length > 0 ? `${topMarketCapCoins[0]?.name} leads market capitalization` : 'Top coins dominate the market'}, indicating investor confidence in established cryptocurrencies.
+                            </Text>
+                        </View>
+
+                        <View style={styles.insightCard}>
+                            <Text style={styles.insightCardTitle}>Volume Distribution</Text>
+                            <Text style={styles.insightCardText}>
+                                Trading volume is well-distributed across the top cryptocurrencies, suggesting healthy market activity and reduced concentration risk. This diversity strengthens overall market resilience.
+                            </Text>
+                        </View>
+
+                        <View style={styles.insightCard}>
+                            <Text style={styles.insightCardTitle}>Market Statistics</Text>
+                            <View style={styles.statsContainer}>
+                                <View style={styles.statItem}>
+                                    <Text style={styles.statItemLabel}>Total Assets Tracked</Text>
+                                    <Text style={styles.statItemValue}>{crypto.length}</Text>
+                                </View>
+                                <View style={styles.statItem}>
+                                    <Text style={styles.statItemLabel}>Global Market Cap</Text>
+                                    <Text style={styles.statItemValue}>{formatNumber(totalMarketCap)}</Text>
+                                </View>
+                                <View style={styles.statItem}>
+                                    <Text style={styles.statItemLabel}>24h Trading Volume</Text>
+                                    <Text style={styles.statItemValue}>{formatNumber(totalVolume)}</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.insightCard}>
+                            <Text style={styles.insightCardTitle}>Investment Opportunities</Text>
+                            <Text style={styles.insightCardText}>
+                                With {crypto.length} cryptocurrencies tracked, investors have diverse options across different market caps and use cases. Monitor price movements and volume trends to identify emerging opportunities in the market.
+                            </Text>
+                        </View>
+
+                        <View style={styles.insightCard}>
+                            <Text style={styles.insightCardTitle}>Risk Management Tips</Text>
+                            <Text style={styles.insightCardText}>
+                                • Diversify across different cryptocurrencies and market caps{'\n'}
+                                • Monitor daily volume and market trends{'\n'}
+                                • Set price alerts for major cryptocurrencies{'\n'}
+                                • Review market indicators regularly
+                            </Text>
+                        </View>
+
+                        <View style={styles.insightCard}>
+                            <Text style={styles.insightCardTitle}>Currency Information</Text>
+                            <Text style={styles.insightCardText}>
+                                Current display: <Text style={styles.highlight}>{currency === 'EUR' ? '€ EUR (Euro)' : currency === 'USD' ? '$ USD (US Dollar)' : '₹ INR (Indian Rupee)'}</Text>{'\n'}
+                                <Text style={styles.note}>
+                                    {currency === 'EUR' ? `Conversion Rate: 1 EUR ≈ ${EUR_TO_INR} INR` : currency === 'USD' ? `Conversion Rate: 1 USD ≈ ${USD_TO_INR} INR` : 'Base Currency: Indian Rupee (INR)'}
+                                </Text>
                             </Text>
                         </View>
                     </>
@@ -284,17 +544,68 @@ const styles = StyleSheet.create({
 
     /* NEW CREATIVE HEADER */
     headerSection: {
-        marginVertical: 12,
-        marginBottom: 24,
+        marginVertical: 8,
+        marginBottom: 12,
+        overflow: 'hidden',
+        borderRadius: 16,
+        backgroundColor: '#F5F3FF',
+        position: 'relative',
+        paddingVertical: 12,
+    },
+
+    waveBackground: {
+        position: 'absolute',
+        top: -10,
+        left: 0,
+        right: 0,
+        height: 160,
+        backgroundColor: 'transparent',
+        borderBottomWidth: 4,
+        borderBottomColor: 'rgba(168,85,247,0.25)',
+        borderRadius: 50,
+    },
+
+    waveBackground2: {
+        position: 'absolute',
+        top: 40,
+        left: 0,
+        right: 0,
+        height: 140,
+        backgroundColor: 'transparent',
+        borderBottomWidth: 3.5,
+        borderBottomColor: 'rgba(168,85,247,0.15)',
+        borderRadius: 50,
     },
 
     titleBar: {
-        marginBottom: 16,
+        marginBottom: 4,
         alignItems: 'center',
+        paddingVertical: 4,
+        paddingHorizontal: 16,
+    },
+
+    titleContainer: {
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
+    },
+
+    glowEffect: {
+        position: 'absolute',
+        width: 240,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: 'rgba(168,85,247,0.2)',
+        top: '50%',
+        left: '50%',
+        marginLeft: -120,
+        marginTop: -50,
+        zIndex: 0,
     },
 
     mainTitle: {
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: '900',
         color: '#2D1B4E',
         letterSpacing: -0.5,
@@ -302,9 +613,9 @@ const styles = StyleSheet.create({
     },
 
     subtitle: {
-        fontSize: 13,
+        fontSize: 11,
         color: '#7C3AED',
-        marginTop: 4,
+        marginTop: 1,
         fontWeight: '500',
         textAlign: 'center',
     },
@@ -312,10 +623,11 @@ const styles = StyleSheet.create({
     selectorBar: {
         borderRadius: 14,
         overflow: 'hidden',
+        marginTop: 12,
     },
 
     selectorBlur: {
-        paddingVertical: 14,
+        paddingVertical: 10,
         paddingHorizontal: 12,
         backgroundColor: 'rgba(168,85,247,0.12)',
         borderWidth: 1.5,
@@ -330,7 +642,7 @@ const styles = StyleSheet.create({
 
     selectorTab: {
         flex: 1,
-        paddingVertical: 18,
+        paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: 'row',
         alignItems: 'center',
@@ -636,6 +948,107 @@ const styles = StyleSheet.create({
         color: '#5B4A7A',
         fontSize: 14,
         lineHeight: 22,
+    },
+
+    currencyToggle: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 10,
+        marginBottom: 16,
+    },
+
+    currencyBtn: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: 'rgba(168,85,247,0.1)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(168,85,247,0.25)',
+    },
+
+    currencyBtnActive: {
+        backgroundColor: 'rgba(168,85,247,0.25)',
+        borderColor: '#A855F7',
+    },
+
+    currencyBtnText: {
+        color: '#6D28D9',
+        fontWeight: '600',
+        fontSize: 14,
+    },
+
+    currencyBtnTextActive: {
+        color: '#4C1D95',
+        fontWeight: '700',
+    },
+
+    filterScroll: {
+        marginBottom: 14,
+    },
+
+    filterBtn: {
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        backgroundColor: 'rgba(168,85,247,0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(168,85,247,0.25)',
+        marginRight: 8,
+    },
+
+    filterBtnActive: {
+        backgroundColor: 'rgba(168,85,247,0.3)',
+        borderColor: '#A855F7',
+    },
+
+    filterBtnText: {
+        color: '#6D28D9',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+
+    filterBtnTextActive: {
+        color: '#4C1D95',
+        fontWeight: '700',
+    },
+
+    statsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 12,
+        gap: 8,
+    },
+
+    statItem: {
+        flex: 1,
+        backgroundColor: 'rgba(168,85,247,0.15)',
+        padding: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+
+    statItemLabel: {
+        color: '#6D28D9',
+        fontSize: 11,
+        fontWeight: '600',
+        marginBottom: 6,
+    },
+
+    statItemValue: {
+        color: '#4C1D95',
+        fontWeight: '700',
+        fontSize: 12,
+    },
+
+    highlight: {
+        color: '#A855F7',
+        fontWeight: '700',
+    },
+
+    note: {
+        color: '#9D4EDD',
+        fontSize: 12,
+        marginTop: 6,
     },
 
     screen: {
